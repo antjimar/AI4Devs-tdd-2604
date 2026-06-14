@@ -28,11 +28,14 @@ jest.mock('@prisma/client', () => {
   };
 });
 
-// Recover the candidate spy from the mocked client so tests can configure and
-// assert it. new PrismaClient() returns the same singleton object the models hold
-// internally, so this is the exact function the code under test calls.
+// Recover the spies from the mocked client so tests can configure and assert them.
+// new PrismaClient() returns the same singleton object the models hold internally,
+// so these are the exact functions the code under test calls.
 const prismaMock = new PrismaClient() as any;
 const mockCandidateCreate = prismaMock.candidate.create as jest.Mock;
+const mockEducationCreate = prismaMock.education.create as jest.Mock;
+const mockWorkExperienceCreate = prismaMock.workExperience.create as jest.Mock;
+const mockResumeCreate = prismaMock.resume.create as jest.Mock;
 
 // A valid candidate used as a baseline. Each test overrides only the field
 // it wants to exercise, so the reason a test fails is obvious at a glance.
@@ -154,6 +157,39 @@ describe('addCandidate - saving to the database', () => {
     // Assert
     expect(mockCandidateCreate).toHaveBeenCalledTimes(1);
     expect(result).toEqual(savedCandidate);
+  });
+
+  it('persists nested educations, work experiences and cv', async () => {
+    // Arrange: the candidate is saved first, then each nested entity in turn
+    mockCandidateCreate.mockResolvedValue({ id: 7 });
+    mockEducationCreate.mockResolvedValue({ id: 70 });
+    mockWorkExperienceCreate.mockResolvedValue({ id: 71 });
+    mockResumeCreate.mockResolvedValue({ id: 72 });
+
+    // Act: a full candidate payload (education + experience + cv)
+    await addCandidate(buildValidCandidate());
+
+    // Assert: each nested entity was persisted via its own Prisma model
+    expect(mockEducationCreate).toHaveBeenCalledTimes(1);
+    expect(mockEducationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ institution: 'University of London', candidateId: 7 }),
+      }),
+    );
+
+    expect(mockWorkExperienceCreate).toHaveBeenCalledTimes(1);
+    expect(mockWorkExperienceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ company: 'Analytical Engine', candidateId: 7 }),
+      }),
+    );
+
+    expect(mockResumeCreate).toHaveBeenCalledTimes(1);
+    expect(mockResumeCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ filePath: '/uploads/ada.pdf', candidateId: 7 }),
+      }),
+    );
   });
 
   it('passes the candidate fields to Prisma', async () => {

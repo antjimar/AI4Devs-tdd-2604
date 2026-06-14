@@ -17,7 +17,7 @@ se puede reconstruir una suite equivalente sobre el mismo código base.
 
 ## 1. Prompt de contexto y exploración
 
-```
+```text
 Vamos a crear una suite de tests unitarios en Jest para la funcionalidad de
 insertar candidatos del backend (un ATS). Antes de escribir nada, explora el
 código relevante (solo lectura):
@@ -39,7 +39,7 @@ No escribas tests todavía.
 
 ## 2. Prompt de planteamiento (definición del *qué*)
 
-```
+```text
 Quiero cubrir las dos familias de tests que pide el ejercicio:
 
 A) Recepción / validación de los datos del formulario (sin base de datos).
@@ -65,7 +65,7 @@ de diseño más importante y es deliberadamente humana, no delegada a la IA.
 
 ## 3. Prompt para los tests de validación (familia A)
 
-```
+```text
 Escribe los tests de la familia A en inglés (código en inglés).
 
 - Crea un helper buildValidCandidate(overrides) que devuelva un candidato válido
@@ -88,7 +88,7 @@ porque el formato de array posicional confunde los `%s` del nombre del test.
 
 ## 4. Prompt para el mock de Prisma (familia B)
 
-```
+```text
 Ahora los tests de la familia B (guardado en BD). El modelo crea un PrismaClient
 a nivel de módulo (const prisma = new PrismaClient()), así que mockea el módulo
 '@prisma/client' completo con jest.mock.
@@ -112,7 +112,7 @@ instanciado a nivel de módulo. Anticiparlo evita el ciclo de prueba-error.
 
 ## 5. Prompt para los casos de guardado (familia B)
 
-```
+```text
 Escribe estos cuatro tests de guardado:
 
 1. addCandidate con datos válidos → llama a prisma.candidate.create una vez y
@@ -135,7 +135,7 @@ robusto frente a cambios menores en el modelo.
 
 ## 6. Prompt de revisión y limpieza
 
-```
+```text
 Revisa el resultado:
 - Asegúrate de que los nombres de los tests parametrizados muestran el mensaje
   esperado, no el objeto de override.
